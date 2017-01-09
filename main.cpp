@@ -6,7 +6,9 @@
 #include <ncurses.h>
 using namespace std;
 
-
+/* Package à installer : libncurses5-dev (sudo apt-get install libncurses5-dev)
+    Compilation préconisée : g++ -std=c++11 main.cpp -lncurses
+*/
 
 typedef vector <char> CVLine; // un type représentant une ligne de la grille
 typedef vector <CVLine> CMatrix; // un type représentant la grille
@@ -88,7 +90,7 @@ void  ShowMatrix (const CMatrix & Mat)
 
 }
 
-CMatrix GenereObstacle(CMatrix Mat){
+CMatrix GenereObstacle(CMatrix & Mat){
 
 
     fstream fic_niveau;
@@ -165,7 +167,33 @@ void waiting(float temps)
 }
 
 
+bool IsObstacle(CMatrix & Mat,string mov){
+    bool is = false;
 
+
+
+    if(mov == "top")
+    {
+        if (Mat[Player.y - 1][Player.x] == obstacle || Mat[Player.y - 1][Player.x] == 'B' ) is = true;
+
+    }
+    else if(mov == "bottom")
+    {
+        if (Mat[Player.y + 1][Player.x] == obstacle || Mat[Player.y + 1][Player.x] == 'B' ) is = true;
+    }
+    else if(mov == "left")
+    {
+        if (Mat[Player.y][Player.x - 1] == obstacle || Mat[Player.y][Player.x - 1] == 'B' ) is = true;
+    }
+    else if(mov == "right")
+    {
+        if (Mat[Player.y][Player.x + 1] == obstacle || Mat[Player.y][Player.x + 1] == 'B' ) is = true;
+    }
+
+    return is;
+
+
+}
 
 void Deplacement_joueur(CMatrix & Mat,int KeyInput)
 {
@@ -175,24 +203,27 @@ void Deplacement_joueur(CMatrix & Mat,int KeyInput)
     switch(Key)
     {
     case 122: // 'z'
-
+        if (IsObstacle(Mat,"top")) break;
         Player.y = Player.y - 1;
         Mat[Player.y][Player.x] = KTokenPlayer;
         Mat[Player.y+1][Player.x] = KVide;
         break;
 
     case 115: // 's'
+        if (IsObstacle(Mat,"bottom")) break;
         Player.y = Player.y + 1;
         Mat[Player.y][Player.x] = KTokenPlayer;
         Mat[Player.y -1][Player.x] = KVide;
         break;
 
     case 113: // 'q'
+        if (IsObstacle(Mat,"left")) break;
         Player.x = Player.x - 1;
         Mat[Player.y][Player.x] = KTokenPlayer;
         Mat[Player.y][Player.x + 1] = KVide;
         break;
     case 100: // 'd'
+        if (IsObstacle(Mat,"right")) break;
         Player.x = Player.x + 1;
         Mat[Player.y][Player.x] = KTokenPlayer;
         Mat[Player.y][Player.x - 1] = KVide;
@@ -200,7 +231,7 @@ void Deplacement_joueur(CMatrix & Mat,int KeyInput)
 
     }
 
-    waiting(0.2);
+    waiting(0.1);
 
 
 
@@ -213,7 +244,7 @@ void Deplacement_joueur(CMatrix & Mat,int KeyInput)
 void Menu(){
 
     ClearScreen();
-    cout << "PackMan version 1.0" << endl;
+    cout << "PackMan version 1.5" << endl;
     cout << " 1 : Jouer en solo" << endl;
     cout << " 2 : Jouer en Multijoueur (non disponible)" << endl;
     cout << " 3 : Quitter" << endl;
@@ -235,6 +266,7 @@ int main(int argc, char *argv[])
     {
         nom_map = "google_map";
     }
+    else exit(0);
 
 
 
@@ -255,7 +287,7 @@ int main(int argc, char *argv[])
         nodelay(stdscr,TRUE);
         cbreak();
         noecho();
-        int KeyInput = getch();
+        int KeyInput = getch(); // on récupere la saisie clavier
         Deplacement_joueur(Map,KeyInput);
         endwin();
         ShowMatrix(Map);
