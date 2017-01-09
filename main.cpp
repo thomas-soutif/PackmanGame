@@ -2,7 +2,8 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
-
+#include <ctime>
+#include <ncurses.h>
 using namespace std;
 
 
@@ -19,8 +20,11 @@ Position Player,Taille_matrice;
 const char KTokenPlayer = 'O';
 const char nourriture = '*';
 const char obstacle = '#';
+const char KVide = ' ';
 string nom_map;
 
+
+int Key;
 
 
 void ClearScreen ()
@@ -152,6 +156,56 @@ void taille_fichier(){ // Cherche la taille de la map contenue dans le fichier n
 
 }
 
+void waiting(float temps)
+{
+    clock_t arrivee=clock()+(temps*CLOCKS_PER_SEC);
+    while(clock()< arrivee);
+
+
+}
+
+
+
+
+void Deplacement_joueur(CMatrix & Mat,int KeyInput)
+{
+
+
+    if(KeyInput > 0 ) Key = KeyInput;
+    switch(Key)
+    {
+    case 122: // 'z'
+
+        Player.y = Player.y - 1;
+        Mat[Player.y][Player.x] = KTokenPlayer;
+        Mat[Player.y+1][Player.x] = KVide;
+        break;
+
+    case 115: // 's'
+        Player.y = Player.y + 1;
+        Mat[Player.y][Player.x] = KTokenPlayer;
+        Mat[Player.y -1][Player.x] = KVide;
+        break;
+
+    case 113: // 'q'
+        Player.x = Player.x - 1;
+        Mat[Player.y][Player.x] = KTokenPlayer;
+        Mat[Player.y][Player.x + 1] = KVide;
+        break;
+    case 100: // 'd'
+        Player.x = Player.x + 1;
+        Mat[Player.y][Player.x] = KTokenPlayer;
+        Mat[Player.y][Player.x - 1] = KVide;
+        break;
+
+    }
+
+    waiting(0.2);
+
+
+
+}
+
 
 
 
@@ -191,6 +245,35 @@ int main(int argc, char *argv[])
     Player.y = 8;
 
     InitMat(Map,Player,nourriture); // On initialise la map (obstacle, joueur ..)
+
+
+    while(true)
+
+	{
+
+        initscr();
+        nodelay(stdscr,TRUE);
+        cbreak();
+        noecho();
+        int KeyInput = getch();
+        Deplacement_joueur(Map,KeyInput);
+        endwin();
+        ShowMatrix(Map);
+
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
     ShowMatrix(Map); // On affiche la Matrice
 
 
