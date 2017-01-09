@@ -19,7 +19,7 @@ Position Player,Taille_matrice;
 const char KTokenPlayer = 'O';
 const char nourriture = '*';
 const char obstacle = '#';
-
+string nom_map;
 
 
 
@@ -61,9 +61,21 @@ void  ShowMatrix (const CMatrix & Mat)
 
         for (unsigned j(0); j < Mat[i].size(); ++j)
         {
-            if(Mat [i][j] == KTokenPlayer)
+            if(Mat [i][j] == KTokenPlayer){
+                Couleur(KJaune);
+                cout << Mat [i][j];
+            }
+            else if( Mat[i][j] == obstacle){
+                Couleur(KRouge);
+                cout << Mat [i][j];
+            }
+            else if (Mat[i][j] == 'B'){
+
                 Couleur(KBleu);
-            cout << Mat [i][j];
+                cout << "#";
+            }
+            else
+                cout << Mat[i][j];
             Couleur(KReset);
         }
 
@@ -76,7 +88,7 @@ CMatrix GenereObstacle(CMatrix Mat){
 
 
     fstream fic_niveau;
-    fic_niveau.open("niveau",ios_base::in);
+    fic_niveau.open(nom_map,ios_base::in);
 
     for(CVLine & Line : Mat )
     {
@@ -87,7 +99,7 @@ CMatrix GenereObstacle(CMatrix Mat){
             fic_niveau >> car;
         }
     }
-
+    fic_niveau.close();
     return Mat;
 
 
@@ -102,7 +114,9 @@ void InitMat (CMatrix & Mat,Position & PosPlayer, const char & nourriture){
     {
 
        for (char & Cel : Line)
-            if(Cel != '#') Cel = nourriture; // On remplace tout ce qui n'est pas des obstacles par de la nourriture
+
+            if (Cel == 'B') Cel = 'B'; // On laisse le B (code couleur)
+            else if(Cel == '_') Cel = nourriture; // On remplace tout ce qui n'est pas des obstacles par de la nourriture
 
     }
 
@@ -112,10 +126,11 @@ void InitMat (CMatrix & Mat,Position & PosPlayer, const char & nourriture){
 
 
 
-void taille_fichier(){ // Cherche la taille de la map contenue dans le fichier du niveau
+void taille_fichier(){ // Cherche la taille de la map contenue dans le fichier nom_map
 
     fstream fic_niveau;
-    fic_niveau.open("niveau",ios_base::in);
+    fic_niveau.open(nom_map,ios_base::in);
+    if(!fic_niveau.is_open()) { cout << "Erreur : La map n'a pas pu être charger (vérifier si le fichier existe)"; exit(1);}
     unsigned ligne = 0;;
     unsigned colonne = 0;
     string line;
@@ -133,19 +148,47 @@ void taille_fichier(){ // Cherche la taille de la map contenue dans le fichier d
     Taille_matrice.y = ligne + 1; // nombre de ligne (rajouter une ligne car l'indice commence a 0);
 
 
-
+    fic_niveau.close();
 
 }
 
 
+
+
+
+void Menu(){
+
+    ClearScreen();
+    cout << "PackMan version 1.0" << endl;
+    cout << " 1 : Jouer en solo" << endl;
+    cout << " 2 : Jouer en Multijoueur (non disponible)" << endl;
+    cout << " 3 : Quitter" << endl;
+
+
+
+
+}
+
 int main(int argc, char *argv[])
 {
 
+    Menu();
+    int choix;
+    cout << "Votre choix ? : ";
+    cin >> choix;
 
-    taille_fichier(); // renvoie le nombre de colonne et de ligne du fichier 'niveau' afin de créer la bonne taille pour la matrice.
+    if(choix == 1 )
+    {
+        nom_map = "google_map";
+    }
+
+
+
+
+    taille_fichier(); // renvoie le nombre de colonne et de ligne du fichier nomp_map afin de créer la bonne taille pour la matrice.
     CMatrix Map(Taille_matrice.y,CVLine(Taille_matrice.x)); // La taille de la matrice dépend de la taille de la map !
     Player.x = 5;
-    Player.y = 9;
+    Player.y = 8;
 
     InitMat(Map,Player,nourriture); // On initialise la map (obstacle, joueur ..)
     ShowMatrix(Map); // On affiche la Matrice
